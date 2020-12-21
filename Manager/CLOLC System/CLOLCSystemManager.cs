@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace CLOC.Manager.CLOLC_System
 {
@@ -41,12 +36,13 @@ namespace CLOC.Manager.CLOLC_System
         }
 
         private void GetRepositoryProject(string repository, Action completd)
-        {                                    
-            string filename = "C:/Program Files/Git/git-bash.exe";
-            string command = $"git clone {repository} {tempLocalPath}";
+        {
+            string gitPath = "C:/Program Files/Git/git-bash.exe";
+            string filename = Directory.Exists(gitPath) ? gitPath : "git.exe";
+            string command = $"clone {repository} {tempLocalPath}";
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo(filename, command)
-            {                
+            {                                
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
@@ -66,6 +62,8 @@ namespace CLOC.Manager.CLOLC_System
             Debug.WriteLine($" EXIT CODE    : {exitCode}");
 
             process.Close();
+
+            completd?.Invoke();
         }
 
         public void StartRepositoryCount(string path)
