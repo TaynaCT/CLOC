@@ -1,4 +1,4 @@
-# CLOC
+# CLOC - Email Senderender
 
 Small project that counts lines of code of any git repository with the help of [CLOC](https://github.com/AlDanial/cloc#sql-) and send the results to a chosen email.
 
