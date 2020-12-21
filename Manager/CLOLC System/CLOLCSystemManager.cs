@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Net.Mail;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CLOC.Manager.CLOLC_System
 {
@@ -25,24 +26,45 @@ namespace CLOC.Manager.CLOLC_System
 
         #endregion
 
-        public Action OnOutputRecieved;
+        private delegate void OutputRecieved(string output);
+        private event OutputRecieved OnOutputRecived;
+
+        public Action ShowOutput;
 
         public string output { get; private set; }
         private bool isRunning;
         private string tempLocalPath = $"D:\\CLOC";
+        
         private CLOLCSystemManager()
         {
             isRunning = false;
+            OnOutputRecived += CLOLCSystemManager_OnOutputRecived;
         }
 
-        private void GetRepositoryProject(string repository, Action completd)
+        private void CLOLCSystemManager_OnOutputRecived(string output)
+        {
+            this.output = output;
+            ShowOutput?.Invoke();
+        }
+
+        private void GetRepositoryProject(string repository, Action completed)
+        {
+            TimeSpan span = DateTime.Now.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            string timestamp = span.TotalSeconds.ToString();
+
+            string command = $"clone {repository} {tempLocalPath}\\{timestamp}";
+
+            RunGit(command, completed);
+        }
+                
+
+        private void RunGit(string command, Action completed)
         {
             string gitPath = "C:/Program Files/Git/git-bash.exe";
             string filename = Directory.Exists(gitPath) ? gitPath : "git.exe";
-            string command = $"clone {repository} {tempLocalPath}";
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo(filename, command)
-            {                                
+            {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
@@ -63,20 +85,24 @@ namespace CLOC.Manager.CLOLC_System
 
             process.Close();
 
-            completd?.Invoke();
+            completed?.Invoke();
         }
 
-        public void StartRepositoryCount(string path)
+        public async Task StartRepositoryCount(string path)
         {
+            string clocEXEPath = $"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\\_External\\cloc-1.88.exe";
+
             if (!isRunning)
             {
                 isRunning = true;
                 GetRepositoryProject(path, () =>
                 {
+                    Debug.WriteLine($"Tring to read lines report!");
+
                     System.Diagnostics.Process process = new System.Diagnostics.Process();
                     process.StartInfo.WorkingDirectory = "d:\\";
                     process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.FileName = "D:\\Projects\\CLOC_EmailSender\\CLOC\\_External\\cloc-1.88.exe";
+                    process.StartInfo.FileName = clocEXEPath;
                     process.StartInfo.Arguments = $"cloc-1.88.exe {tempLocalPath}";
                     process.StartInfo.CreateNoWindow = true;
                     process.StartInfo.RedirectStandardInput = true;
@@ -84,37 +110,56 @@ namespace CLOC.Manager.CLOLC_System
                     process.StartInfo.RedirectStandardError = true;
 
                     process.Start();
+                    
+                    string error = process.StandardError.ReadToEnd();
+                    var exitCode = process.ExitCode;
+                    string result = process.StandardOutput.ReadToEnd();
 
-                    this.output = process.StandardOutput.ReadToEnd();
+                    Debug.WriteLine($" ERROR: {error}");
+                    Debug.WriteLine($" EXIT CODE    : {exitCode}");
 
                     process.Close();
 
-                    OnOutputRecieved?.Invoke();
+                    OnOutputRecived?.Invoke(result);
+                    //ClearTempRepository(() => { ClearDirectory(tempLocalPath); });                       
+                    ClearDirectory(tempLocalPath);
                 });
 
                 isRunning = false;
             }
         }
 
-        public void SendReportToEmail(string email, string body)
+        private void ClearTempRepository(Action completed)
         {
-            string sender = "tayna-ct12@hotmail.com";
-
-            var client = new SmtpClient("smtp.gmail.com", 587)
-            {
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(sender, "password"),
-                EnableSsl = true
-            };
-            try
-            {
-                client.Send(sender, email, "test", "testbody");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception caught in CreateTestMessage2(): {0}",
-                    ex.ToString());
-            }
+            string comand = $" rm -rf .git*";
+            RunGit(comand, completed);
         }
+
+        private void ClearDirectory(string directorypath)
+        {
+            if (Directory.Exists(directorypath))
+            {
+                try
+                {
+                    DirectoryInfo dir = new DirectoryInfo(directorypath);
+
+                    foreach (FileInfo fi in dir.GetFiles())
+                    {
+                        fi.Delete();
+                    }
+
+                    foreach (DirectoryInfo di in dir.GetDirectories())
+                    {
+                        ClearDirectory(di.FullName);
+                        di.Delete();
+                    }
+                }
+                catch (Exception e) {
+
+                    Debug.WriteLine($"{e.ToString()}");
+                }
+            }
+        }        
+
     }
 }
