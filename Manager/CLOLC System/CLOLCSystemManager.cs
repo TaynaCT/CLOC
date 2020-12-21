@@ -33,11 +33,12 @@ namespace CLOC.Manager.CLOLC_System
 
         public string output { get; private set; }
         private bool isRunning;
-        private string tempLocalPath = $"D:\\CLOC";
+        private string tempLocalPath;
         
         private CLOLCSystemManager()
         {
             isRunning = false;
+            tempLocalPath = $"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\\_Repositories";
             OnOutputRecived += CLOLCSystemManager_OnOutputRecived;
         }
 
@@ -51,16 +52,16 @@ namespace CLOC.Manager.CLOLC_System
         {
             TimeSpan span = DateTime.Now.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc));
             string timestamp = span.TotalSeconds.ToString();
+            timestamp.Replace(',', '-'); 
 
             string command = $"clone {repository} {tempLocalPath}\\{timestamp}";
 
             RunGit(command, completed);
         }
                 
-
         private void RunGit(string command, Action completed)
         {
-            string gitPath = "C:/Program Files/Git/git-bash.exe";
+            string gitPath = "C:\\Program Files\\Git\\cmd\\git.exe";
             string filename = Directory.Exists(gitPath) ? gitPath : "git.exe";
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo(filename, command)
@@ -120,8 +121,7 @@ namespace CLOC.Manager.CLOLC_System
 
                     process.Close();
 
-                    OnOutputRecived?.Invoke(result);
-                    //ClearTempRepository(() => { ClearDirectory(tempLocalPath); });                       
+                    OnOutputRecived?.Invoke(result);                          
                     ClearDirectory(tempLocalPath);
                 });
 
@@ -129,12 +129,7 @@ namespace CLOC.Manager.CLOLC_System
             }
         }
 
-        private void ClearTempRepository(Action completed)
-        {
-            string comand = $" rm -rf .git*";
-            RunGit(comand, completed);
-        }
-
+    
         private void ClearDirectory(string directorypath)
         {
             if (Directory.Exists(directorypath))
@@ -145,6 +140,7 @@ namespace CLOC.Manager.CLOLC_System
 
                     foreach (FileInfo fi in dir.GetFiles())
                     {
+                        fi.Attributes = FileAttributes.Normal;
                         fi.Delete();
                     }
 
