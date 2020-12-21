@@ -32,9 +32,14 @@ namespace CLOC
             this.OutputBody.Text = CLOLCSystemManager.Instance.output;
         }
 
+        private void SendEmailBttn_Click(object sender, RoutedEventArgs e)
+        {
+            CLOLCSystemManager.Instance.SendReportToEmail(this.EmailText.Text, this.OutputBody.Text);
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            CLOLCSystemManager.Instance.StartRepositoryCount("D:\\Projects\\Python\\first_app");
-        }
+            CLOLCSystemManager.Instance.StartRepositoryCount(this.PathText.Text);
+        }       
     }
 }

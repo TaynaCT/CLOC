@@ -8,10 +8,12 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid Margin="25,25,25,25">
         <Button x:Name="StartCountBttn" Content="Count" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,38,0,0" Click="Button_Click"/>
-        <TextBox HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="Repository" VerticalAlignment="Top" Width="120" Margin="10,10,0,0"/>
-        <ScrollViewer Margin="0,80,0,10">
+        <TextBox x:Name="PathText" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="Repository" VerticalAlignment="Top" Width="342" Margin="10,10,0,0"/>
+        <ScrollViewer Margin="10,80,390,10">
             <TextBox x:Name="OutputBody" AcceptsReturn="True" AcceptsTab="True" BorderThickness="1"></TextBox>
         </ScrollViewer>
+        <TextBox x:Name="EmailText" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="Email" VerticalAlignment="Top" Width="342" Margin="390,10,0,0" AutomationProperties.HelpText="Email"/>
+        <Button x:Name="SendEmailBttn" Content="Send To Emails" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="657,38,0,0" Click="SendEmailBttn_Click"/>
 
     </Grid>
 </Window>
