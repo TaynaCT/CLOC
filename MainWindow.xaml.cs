@@ -17,7 +17,7 @@ namespace CLOC
             this.SendEmailBttn.Visibility = Visibility.Hidden;
             this.SendToLabel.Visibility = Visibility.Hidden;            
 
-            CLOLCSystemManager.Instance.ShowOutput += OnOutPutRecived;
+            CLOCSystemManager.Instance.ShowOutput += OnOutPutRecived;
         }
 
         private void OnOutPutRecived()
@@ -28,7 +28,7 @@ namespace CLOC
 
             this.OutputBody.Text = $"REPORT RECIVED";
             this.OutputBody.Text += $"\nREPOSITORY: {this.PathText.Text}\n";
-            this.OutputBody.Text += $"\n{ CLOLCSystemManager.Instance.output}";
+            this.OutputBody.Text += $"\n{ CLOCSystemManager.Instance.output}";
         }
                 
         private void SendEmailBttn_Click(object sender, RoutedEventArgs e)
@@ -41,7 +41,7 @@ namespace CLOC
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             this.OutputBody.Text = $"Recieving data from repository: {this.PathText.Text} ...";
-            CLOLCSystemManager.Instance.StartRepositoryCount(this.PathText.Text);
+            CLOCSystemManager.Instance.StartRepositoryCount(this.PathText.Text);
         }
 
     }

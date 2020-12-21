@@ -128,7 +128,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Manager\CLOLC System\CLOLCSystemManager.cs" />
+    <Compile Include="Manager\CLOLC System\CLOCSystemManager.cs" />
     <Compile Include="Manager\Email\EmailManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

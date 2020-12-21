@@ -62,7 +62,7 @@ namespace CLOC.Manager.Email
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
                     await client.ConnectAsync("smtp.gmail.com", 587);
-                    await client.AuthenticateAsync(sender, "********");
+                    await client.AuthenticateAsync(sender, "****");
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);
                 }
